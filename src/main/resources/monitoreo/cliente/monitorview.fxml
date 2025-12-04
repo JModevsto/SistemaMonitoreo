@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="monitoreo.cliente.MonitorController">    <top>
+        <VBox alignment="CENTER" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="Monitor de Acelerómetro en Tiempo Real" textFill="#015294">
+                    <font>
+                        <Font name="Segoe UI Semibold" size="24.0" />
+                    </font>
+                </Label>
+                <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0" spacing="15.0">
+                    <children>
+                        <Label text="Puerto Serial:">
+                            <font>
+                                <Font name="Segoe UI" size="14.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="cbPuertos" onAction="#seleccionarPuerto" prefWidth="150.0" promptText="Seleccionar COM" />
+                        <Button fx:id="btnIniciarDetener" mnemonicParsing="false" onAction="#iniciarDetenerLectura" prefHeight="30.0" prefWidth="150.0" style="-fx-background-color: #f8bb00; -fx-background-radius: 4;" text="Iniciar Lectura" textFill="#015294">
+                            <font>
+                                <Font name="Segoe UI Bold" size="14.0" />
+                            </font>
+                        </Button>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#irAtras" prefHeight="30.0" style="-fx-background-color: #015294; -fx-background-radius: 4;" text="← Regresar" textFill="WHITE">
+                            <font>
+                                <Font name="Segoe UI Bold" size="14.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <AnchorPane BorderPane.alignment="CENTER">
+            <children>
+                <LineChart fx:id="lineChart" title="Datos X, Y, Z vs. Tiempo (ms)" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                    <xAxis>
+                        <NumberAxis fx:id="xAxis" animated="false" label="Tiempo (muestras)" side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="yAxis" animated="false" label="Valor de Aceleración" side="LEFT" />
+                    </yAxis>
+                </LineChart>
+            </children>
+        </AnchorPane>
+    </center>
+    <bottom>
+        <HBox alignment="CENTER" prefHeight="40.0" spacing="50.0" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="Última Lectura:">
+                    <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                    </font>
+                </Label>
+                <Label text="X:">
+                    <font>
+                        <Font name="Segoe UI" size="14.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblX" text="---">
+                    <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                    </font>
+                </Label>
+                <Label text="Y:">
+                    <font>
+                        <Font name="Segoe UI" size="14.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblY" text="---">
+                    <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                    </font>
+                </Label>
+                <Label text="Z:">
+                    <font>
+                        <Font name="Segoe UI" size="14.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblZ" text="---">
+                    <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                    </font>
+                </Label>
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>

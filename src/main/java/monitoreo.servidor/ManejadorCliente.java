@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.List; // Necesario para la lista de resultados
+import java.util.ArrayList; // Necesario para la lista de resultados
 
 // Clase que maneja la comunicación con UN cliente específico en su propio Thread
 public class ManejadorCliente implements Runnable {
@@ -81,59 +81,37 @@ public class ManejadorCliente implements Runnable {
             out.println(respuestaEncriptada);
 
         } else if (mensajeDesencriptado.startsWith("CONSULTAR:")) {
-            // Ejemplo de mensaje esperado: "CONSULTAR:fecha_de_captura=2025-01-01,hora_de_captura=10:00:00"
+            // Ejemplo de mensaje esperado: "CONSULTAR:2025-12-01" (solo fecha)
             String filtros = mensajeDesencriptado.substring("CONSULTAR:".length());
             System.out.println("3. Cliente solicitó consulta histórica con filtros: " + filtros);
 
-            // 1. Parsear los filtros (Simplificación: asumimos que no hay filtros o que son solo fecha/hora)
-            // Aquí puedes implementar una lógica de parseo más robusta, pero por ahora:
-            String fechaFiltro = null;
-            String horaFiltro = null;
-
-            // Lógica simple para extraer filtros (asume formato clave=valor, separador coma)
-            if (!filtros.trim().isEmpty()) {
-                String[] params = filtros.split(",");
-                for (String param : params) {
-                    if (param.contains("fecha_de_captura=")) {
-                        fechaFiltro = param.substring("fecha_de_captura=".length()).trim();
-                    } else if (param.contains("hora_de_captura=")) {
-                        horaFiltro = param.substring("hora_de_captura=".length()).trim();
-                    }
-                }
-            }
-
-            // Si el cliente envía filtros vacíos (o solo quiere todo), los ignoramos en la llamada a la DB
-            if (fechaFiltro != null && horaFiltro != null) {
-                System.out.println("-> Aplicando filtro desde: " + fechaFiltro + " " + horaFiltro);
-            } else {
-                // Si el cliente no envió filtros, consultamos todos los datos (pasamos null, null)
-                fechaFiltro = null;
-                horaFiltro = null;
-            }
+            // 1. Asumimos que el filtro es la fecha (YYYY-MM-DD)
+            String fechaFiltro = filtros.trim().isEmpty() ? null : filtros.trim();
 
             // 2. Consultar la base de datos
-            List<String> registros = ConexionBD.consultarDatos(fechaFiltro, horaFiltro);
+            // El método consultaDatos ahora espera solo la fecha de filtro.
+            List<String> datos = ConexionBD.consultarDatos(fechaFiltro);
 
             // 3. Formatear y enviar los datos
-            // Unir todos los registros en un solo String usando un separador (ej: |)
-            String datosParaEnviar = String.join("|", registros);
+            // 🚨 CORRECCIÓN: Usar la variable 'datos' en lugar de la variable no declarada 'registros'
+            String datosParaEnviar = String.join("|", datos);
 
             // Si no hay datos, enviamos un mensaje de error o vacío
             String datosEncriptados;
-            if (registros.isEmpty()) {
+            if (datos.isEmpty()) {
                 datosEncriptados = CifradoUtil.encrypt("ERROR:No se encontraron datos con esos filtros.");
                 System.out.println("4. Se envió ERROR de consulta.");
             } else {
-                // El formato final enviado será: "DATA:x1,y1,z1,f1,h1|x2,y2,z2,f2,h2|..."
+                // El formato final enviado será: "DATA:ID,x,y,z,f,h|ID,x,y,z,f,h|..."
                 String mensajeFinal = "DATA:" + datosParaEnviar;
                 datosEncriptados = CifradoUtil.encrypt(mensajeFinal);
-                System.out.println("4. Se enviaron " + registros.size() + " registros.");
+                System.out.println("4. Se enviaron " + datos.size() + " registros.");
             }
 
             out.println(datosEncriptados);
 
         } else {
-            // ... (Lógica de mensaje no reconocido)
+            System.err.println("Petición no reconocida: " + mensajeDesencriptado);
         }
     }
 
@@ -154,7 +132,7 @@ public class ManejadorCliente implements Runnable {
             int y = Integer.parseInt(partes[1].trim());
             int z = Integer.parseInt(partes[2].trim());
 
-            // Llamada al método de inserción en la BD
+            // Llamada al método de inserción en la BD (usa fecha y hora actuales)
             boolean exito = ConexionBD.insertarDatos(x, y, z);
 
             if (exito) {

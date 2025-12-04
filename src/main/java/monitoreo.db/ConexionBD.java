@@ -3,17 +3,16 @@ package monitoreo.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.sql.ResultSet; // ¡Nuevo Import!
-import java.util.ArrayList; // ¡Nuevo Import!
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConexionBD {
 
-    // Nombre del archivo de la base de datos (se creará en la raíz del proyecto)
     private static final String URL = "jdbc:sqlite:monitorBD.db";
 
     /**
@@ -23,10 +22,8 @@ public class ConexionBD {
     public static Connection getConnection() {
         Connection conn = null;
         try {
-            // Asegura que el driver JDBC de SQLite esté cargado
             Class.forName("org.sqlite.JDBC");
             conn = DriverManager.getConnection(URL);
-            // System.out.println("Conexión a la base de datos establecida.");
             return conn;
         } catch (SQLException e) {
             System.err.println("Error de SQL al conectar: " + e.getMessage());
@@ -38,6 +35,7 @@ public class ConexionBD {
 
     /**
      * Crea la tabla 'datos_sensor' si no existe.
+     * NOTA: La tabla usa nombres de columna cortos (x, y, z).
      */
     public static void crearTabla() {
         String sql = """
@@ -65,35 +63,31 @@ public class ConexionBD {
         }
     }
 
-    /**
-     * Cierra la conexión a la base de datos.
-     * @param conn La conexión a cerrar.
-     */
-    public static void closeConnection(Connection conn) {
-        try {
-            if (conn != null) {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al cerrar la conexión: " + e.getMessage());
-        }
-    }
-    /**
-     * Inserta un nuevo registro de datos del sensor en la tabla 'datos_sensor'.
-     * @param x Valor del eje X.
-     * @param y Valor del eje Y.
-     * @param z Valor del eje Z.
-     * @return true si la inserción fue exitosa, false en caso contrario.
-     */
-    public static boolean insertarDatos(int x, int y, int z) {
-        String sql = "INSERT INTO datos_sensor (x, y, z, fecha_de_captura, hora_de_captura) VALUES (?, ?, ?, ?, ?)";
+    // --- MÉTODO 1: INSERCIÓN EN TIEMPO REAL (Usa la hora actual) ---
 
-        // 1. Obtener la fecha y hora actual en el formato de la BD
+    public static boolean insertarDatos(int x, int y, int z) {
         LocalDateTime now = LocalDateTime.now();
         String fecha = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         String hora = now.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
-        // Usamos try-with-resources para asegurar el cierre de Connection y PreparedStatement
+        return guardarDatos(x, y, z, fecha, hora);
+    }
+
+    // --- MÉTODO 2: GUARDAR DATOS CON FECHA ESPECÍFICA (CORREGIDO) ---
+
+    /**
+     * Guarda datos del sensor en la DB usando una fecha y hora proporcionadas.
+     * @param x Valor del eje X.
+     * @param y Valor del eje Y.
+     * @param z Valor del eje Z.
+     * @param fechaStr Fecha (yyyy-MM-dd).
+     * @param horaStr Hora (HH:mm:ss).
+     * @return true si la inserción fue exitosa.
+     */
+    public static boolean guardarDatos(int x, int y, int z, String fechaStr, String horaStr) {
+        // 🚨 CORRECCIÓN: Usar x, y, z en lugar de eje_x, eje_y, eje_z
+        String sql = "INSERT INTO datos_sensor (x, y, z, fecha_de_captura, hora_de_captura) VALUES (?, ?, ?, ?, ?)";
+
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -102,14 +96,14 @@ public class ConexionBD {
                 return false;
             }
 
-            // 2. Asignar los valores a los placeholders (?)
+            // Asignar los valores
             pstmt.setInt(1, x);
             pstmt.setInt(2, y);
             pstmt.setInt(3, z);
-            pstmt.setString(4, fecha);
-            pstmt.setString(5, hora);
+            pstmt.setString(4, fechaStr);
+            pstmt.setString(5, horaStr);
 
-            // 3. Ejecutar la inserción
+            // Ejecutar la inserción
             int affectedRows = pstmt.executeUpdate();
 
             return affectedRows > 0;
@@ -119,26 +113,27 @@ public class ConexionBD {
             return false;
         }
     }
+
+    // --- MÉTODO 3: CONSULTA DE DATOS HISTÓRICOS (CORREGIDO) ---
+
     /**
-     * Consulta los datos de la tabla 'datos_sensor' aplicando filtros opcionales.
-     * @param fechaInicio Filtro de fecha de inicio (formato yyyy-MM-dd), null para ignorar.
-     * @param horaInicio Filtro de hora de inicio (formato HH:mm:ss), null para ignorar.
-     * @return Una lista de Strings, donde cada String es una fila de datos (ej: "x,y,z,fecha,hora").
+     * Consulta los datos de la tabla 'datos_sensor' aplicando filtro por día.
+     * @param filtroFecha Filtro de fecha (formato yyyy-MM-dd). Si es nulo, trae todos.
+     * @return Una lista de Strings, donde cada String es una fila de datos.
      */
-    public static List<String> consultarDatos(String fechaInicio, String horaInicio) {
+    public static List<String> consultarDatos(String filtroFecha) {
 
         List<String> registros = new ArrayList<>();
-        String sql = "SELECT x, y, z, fecha_de_captura, hora_de_captura FROM datos_sensor";
+        // 🚨 CORRECCIÓN: Usar x, y, z en lugar de eje_x, eje_y, eje_z
+        String sql = "SELECT id, x, y, z, fecha_de_captura, hora_de_captura FROM datos_sensor";
 
-        // Lógica de filtrado simple. El cliente solo solicita fecha y hora, no un rango.
-        // Si ambos filtros están presentes, asumimos que es un filtro de punto de inicio
-        // para traer todo lo posterior.
-        if (fechaInicio != null && !fechaInicio.isEmpty()) {
-            // Esta lógica es simplificada para filtrar desde una fecha/hora dada
-            sql += " WHERE fecha_de_captura >= ? AND hora_de_captura >= ?";
+        // Lógica de Filtrado: Filtramos por el campo 'fecha_de_captura'
+        if (filtroFecha != null && !filtroFecha.isEmpty()) {
+            sql += " WHERE fecha_de_captura = ?";
         }
 
-        sql += " ORDER BY fecha_de_captura, hora_de_captura ASC"; // Ordenar cronológicamente
+        // Ordenar cronológicamente
+        sql += " ORDER BY fecha_de_captura, hora_de_captura ASC";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -146,19 +141,20 @@ public class ConexionBD {
             if (conn == null) return registros;
 
             // Asignar parámetros si se usan filtros
-            if (fechaInicio != null && !fechaInicio.isEmpty()) {
-                pstmt.setString(1, fechaInicio);
-                pstmt.setString(2, horaInicio);
+            if (filtroFecha != null && !filtroFecha.isEmpty()) {
+                pstmt.setString(1, filtroFecha);
             }
 
-            // 1. Ejecutar la consulta
+            // Ejecutar la consulta
             ResultSet rs = pstmt.executeQuery();
 
-            // 2. Procesar el resultado
+            // Procesar el resultado
             while (rs.next()) {
-                String fila = rs.getInt("x") + ","
-                        + rs.getInt("y") + ","
-                        + rs.getInt("z") + ","
+                // Formato de salida requerido por el Cliente: ID,X,Y,Z,Fecha,Hora
+                String fila = rs.getInt("id") + ","
+                        + rs.getInt("x") + "," // 🚨 CORRECCIÓN: Leer la columna 'x'
+                        + rs.getInt("y") + "," // 🚨 CORRECCIÓN: Leer la columna 'y'
+                        + rs.getInt("z") + "," // 🚨 CORRECCIÓN: Leer la columna 'z'
                         + rs.getString("fecha_de_captura") + ","
                         + rs.getString("hora_de_captura");
                 registros.add(fila);

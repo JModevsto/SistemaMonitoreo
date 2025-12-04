@@ -17,6 +17,7 @@ public class InicioController {
     @FXML
     public void initialize() {
         // Método llamado después de que el FXML carga
+        // Esto solo es una verificación inicial, el proceso se actualiza en iniciarServidor
         if (servidorProcess != null && servidorProcess.isAlive()) {
             btnServidor.setDisable(true); // Deshabilita si ya está corriendo
         }
@@ -27,13 +28,16 @@ public class InicioController {
     @FXML
     private void irAMonitor() throws IOException {
         System.out.println("Navegando a Monitor...");
-        // ClienteApp.loadView("monitorview.fxml"); // Descomentar al crear MonitorView.fxml
+        // 🚨 CAMBIO: Cargar la vista del monitor
+        ClienteApp.loadView("monitorview.fxml");
     }
 
     @FXML
     private void irAHistorico() throws IOException {
         System.out.println("Navegando a Histórico...");
-        // ClienteApp.loadView("historicoview.fxml"); // Descomentar al crear HistoricoView.fxml
+        // 🚨 CAMBIO: Cargar la vista de histórico
+        // NOTA: Asumo que nombrarás este FXML como "historicoview.fxml"
+        ClienteApp.loadView("historicoview.fxml");
     }
 
     // --- LÓGICA DE INICIO DE SERVIDOR ---
@@ -51,21 +55,16 @@ public class InicioController {
 
         try {
             // 1. Definir rutas necesarias
-            // Obtenemos la ruta raíz del proyecto (para encontrar target/classes)
             String projectPath = new File("").getAbsolutePath();
-            // Ruta de las clases compiladas de este proyecto
             String targetClasses = projectPath + File.separator + "target" + File.separator + "classes";
-            // Ruta base del repositorio Maven del usuario
             String homePath = System.getProperty("user.home");
 
             // 2. Rutas a los JARs de dependencias externas que debe tener el Servidor
-            // Versión de la librería SQLite
             String sqlitePath = homePath +
                     File.separator + ".m2" + File.separator + "repository" + File.separator + "org" +
                     File.separator + "xerial" + File.separator + "sqlite-jdbc" + File.separator + "3.45.1.0" +
                     File.separator + "sqlite-jdbc-3.45.1.0.jar";
 
-            // Versión de la librería SLF4J API (necesaria por SQLite)
             String slf4jApiPath = homePath +
                     File.separator + ".m2" + File.separator + "repository" + File.separator + "org" +
                     File.separator + "slf4j" + File.separator + "slf4j-api" + File.separator + "1.7.36" +
@@ -84,7 +83,6 @@ public class InicioController {
                     "monitoreo.servidor.ServidorApp" // Clase main a ejecutar
             );
 
-            // Asegura que el proceso Servidor se ejecute desde la raíz del proyecto
             pb.directory(new File(projectPath));
             pb.inheritIO(); // Redirige la salida del Servidor a la consola del Cliente
 
