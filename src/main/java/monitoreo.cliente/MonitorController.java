@@ -56,9 +56,6 @@ public class MonitorController {
         lineChart.setAnimated(false);
     }
 
-    // El método cargarPuertos() y seleccionarPuerto() ya no son necesarios
-    // pero mantenemos el ComboBox visible para evitar errores de FXML.
-
     // --- EVENTOS Y CONTROL ---
 
     @FXML
@@ -118,9 +115,11 @@ public class MonitorController {
                 // 2. Ejecutar la actualización de GUI y envío en el hilo de JavaFX
                 Platform.runLater(() -> actualizarGraficaYEnviar(x, y, z));
 
-                // Esperar un breve período (simula la velocidad de lectura del puerto serial)
-                Thread.sleep(100);
+                // CAMBIO DE VELOCIDAD AQUÍ: Espera 1 segundo (1000 ms)
+                Thread.sleep(1000);
+
             } catch (InterruptedException e) {
+                // Si el hilo es interrumpido (al detener el monitoreo)
                 lecturaActiva = false;
             }
         }
