@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="560.0" prefWidth="800.0" styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx" fx:controller="monitoreo.cliente.InicioController">
+    <stylesheets>
+        <URL value="@inicioview.css" />
+    </stylesheets>
+    <children>
+        <ImageView fitHeight="288.0" fitWidth="243.0" layoutX="279.0" layoutY="81.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@EscudoUnison.png" />
+            </image>
+        </ImageView>
+
+        <Label layoutX="244.0" layoutY="367.0" text="Sistema de Monitoreo" textFill="#00529e">
+            <font>
+                <Font name="Segoe UI Bold" size="30.0" />
+            </font>
+        </Label>
+
+        <Label layoutX="269.0" layoutY="411.0" text="Juan Modesto Morales Osuna" textFill="#015294">
+            <font>
+                <Font name="Segoe UI" size="20.0" />
+            </font>
+        </Label>
+
+        <Button
+                fx:id="btnMonitor"
+                layoutX="258.0"
+                layoutY="465.0"
+                mnemonicParsing="false"
+                onAction="#irAMonitor"
+                prefHeight="50.0"
+                prefWidth="120.0"
+                text="Monitor"
+                styleClass="btn-dorado"
+        >
+            <font>
+                <Font name="Segoe UI Bold" size="14.0" />
+            </font>
+        </Button>
+
+        <Button
+                fx:id="btnHistorico"
+                layoutX="423.0"
+                layoutY="465.0"
+                mnemonicParsing="false"
+                onAction="#irAHistorico"
+                prefHeight="50.0"
+                prefWidth="120.0"
+                text="Histórico"
+                styleClass="btn-dorado"
+        >
+            <font>
+                <Font name="Segoe UI Bold" size="14.0" />
+            </font>
+        </Button>
+
+        <Button
+                fx:id="btnServidor"
+                layoutX="300.0"
+                layoutY="30.0"
+                mnemonicParsing="false"
+                onAction="#iniciarServidor"
+                prefHeight="30.0"
+                prefWidth="201.0"
+                text="Inicializar Servidor"
+                styleClass="btn-azul"
+        >
+            <font>
+                <Font name="Segoe UI Bold" size="14.0" />
+            </font>
+        </Button>
+    </children>
+</AnchorPane>

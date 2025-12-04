@@ -1,0 +1,38 @@
+.button {
+    /* Fuente: Segoe UI (aunque FXML lo define, es buena práctica) */
+    /* Bordes redondeados de 4px para fondo y borde */
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+/* ---------------------------------------------------- */
+/* 1. BOTONES MONITOR E HISTÓRICO (DORADOS) */
+/* Requerimiento: Dorado Unison, Texto Negro, Hover Dorado Oscuro, Hover Texto Blanco */
+/* ---------------------------------------------------- */
+
+.btn-dorado {
+    -fx-background-color: #f8bb00; /* Dorado Unison */
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+}
+
+.btn-dorado:hover {
+    -fx-background-color: #d99e30; /* Dorado Oscuro Unison */
+    -fx-text-fill: white;
+}
+
+/* ---------------------------------------------------- */
+/* 2. BOTÓN SERVIDOR (AZUL MARINO) */
+/* Requerimiento: Azul Marino, Texto Blanco, Hover Azul Unison (más claro), Hover Texto Blanco */
+/* ---------------------------------------------------- */
+
+.btn-azul {
+    -fx-background-color: #015294; /* Azul Oscuro Unison (Marino) */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.btn-azul:hover {
+    -fx-background-color: #00529e; /* Azul Unison (Más claro) */
+    -fx-text-fill: white;
+}
